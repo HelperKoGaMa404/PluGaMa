@@ -87,41 +87,43 @@ function applyFilters(searchQuery, typeValue) {
     `;
     pluginContainer.innerHTML = listHTML;
     document.querySelectorAll('.toggle input[type="checkbox"]').forEach(toggle => {
-        fetch(chrome.runtime.getURL(`plugins/${toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText}.js`)).then(response => {
-            if (response) {
-                async function loadEnabledPlugins() {
-                    key = await chrome.storage.local.get([toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText]);
-                    toggle.checked = key[toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText];
-                }
-                loadEnabledPlugins();
-                toggle.addEventListener('click', function (e) {
-                    chrome.storage.local.set({[e.target.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText]: e.target.checked});
-                });
+        fetch(`https://raw.githubusercontent.com/HelperKoGaMa404/PluGaMa/refs/heads/main/plugins.json`).then(response => {
+            if (response.ok) {
+                return response.json();
             }
-        }).catch(error => {
-            const downloadButton = document.createElement('i');
-            downloadButton.className = 'fa-light fa-download';
-            toggle.parentElement.appendChild(downloadButton);
-            downloadButton.addEventListener('click', function () {
-                fetch(`https://raw.githubusercontent.com/HelperKoGaMa404/PluGaMa/refs/heads/main/plugins.json`).then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    }
-                }).then(data => {
-                    data.forEach(plugin => {
-                        if (plugin.title === downloadButton.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText) {
-                            chrome.downloads.download({
-                                url: `https://raw.githubusercontent.com/HelperKoGaMa404/PluGaMa/refs/heads/main/plugins/${plugin.source_code}`,
-                                filename: plugin.source_code,
-                                saveAs: true
+        }).then(data => {
+            data.forEach(plugin => {
+                if (plugin.title === toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText) {
+                    fetch(chrome.runtime.getURL(`plugins/${plugin.source_code}`)).then(response => {
+                        if (response) {
+                            async function loadEnabledPlugins() {
+                                key = await chrome.storage.local.get([toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText]);
+                                toggle.checked = key[toggle.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText];
+                            }
+                            loadEnabledPlugins();
+                            toggle.addEventListener('click', function (e) {
+                                chrome.storage.local.set({[e.target.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText]: e.target.checked});
                             });
                         }
-                    })
-                })
-            })
-            toggle.parentElement.querySelector('.slider.round').remove();
-            toggle.remove();
-        })
+                    }).catch(error => {
+                        const downloadButton = document.createElement('i');
+                        downloadButton.className = 'fa-light fa-download';
+                        toggle.parentElement.appendChild(downloadButton);
+                        downloadButton.addEventListener('click', function () {
+                            if (plugin.title === downloadButton.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText) {
+                                chrome.downloads.download({
+                                    url: `https://raw.githubusercontent.com/HelperKoGaMa404/PluGaMa/refs/heads/main/plugins/${plugin.source_code}`,
+                                    filename: plugin.source_code,
+                                    saveAs: true
+                                });
+                            }
+                        });
+                        toggle.parentElement.querySelector('.slider.round').remove();
+                        toggle.remove();
+                    });
+                }
+            });
+        });
     });
 }
 function loadPlugins(searchQuery, typeValue) {
