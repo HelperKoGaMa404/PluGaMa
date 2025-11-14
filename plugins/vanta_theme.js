@@ -1,4 +1,3 @@
-
 // Made by cybrskunk, ported to PluGaMa by me.
 
 // ⋆｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆ | Snippet to allow copy-pasting on website.
@@ -10,8 +9,7 @@
   }
   document.addEventListener("paste", allowPaste, true);
 })();
- 
- 
+
 // ⋆｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆ | Snippet to hide bloated navigation menu + gold icon in user panel.
 (function () {
   "use strict";
@@ -23,45 +21,44 @@
       "/purchase/",
     ];
     const menuLinks = document.querySelectorAll("a.MuiTypography-root");
- 
+
     menuLinks.forEach((link) => {
       if (menuItemsToHide.includes(link.getAttribute("href"))) {
         const parentLi = link.closest("li");
-        if (parentLi) {
-          parentLi.style.display = "none";
-        }
+        if (parentLi) parentLi.style.display = "none";
       }
     });
+
     const levelItem = Array.from(menuLinks).find((link) => {
       const href = link.getAttribute("href");
       return href && href.includes("/levels/");
     });
     if (levelItem) {
       const parentLi = levelItem.closest("li");
-      if (parentLi) {
-        parentLi.style.display = "none";
-      }
+      if (parentLi) parentLi.style.display = "none";
     }
+
     const goldCubeItem = document.querySelector("li._3WhKY._18cmu");
-    if (goldCubeItem) {
-      goldCubeItem.style.display = "none";
-    }
+    if (goldCubeItem) goldCubeItem.style.display = "none";
   }
- 
   window.addEventListener("load", hideMenuItems);
 })();
+
+// CSS Inject utility 
 const injectCss = (id, css) => {
+  const old = document.getElementById(id);
+  if (old) old.remove();
   const style = document.createElement("style");
   style.id = id;
   style.innerText = css;
   document.head.appendChild(style);
   return style;
 };
- 
-// ⋆｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆ | Snippet to process image RGB to make profile banner look cleaner.
+
+// ⋆｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆ | Snippet to process image RGB to make profile banner cleaner.
 (function () {
   "use strict";
- 
+
   function removeBlueBackground(imageUrl, callback) {
     const img = new Image();
     img.crossOrigin = "Anonymous";
@@ -71,39 +68,38 @@ const injectCss = (id, css) => {
       canvas.width = img.width;
       canvas.height = img.height;
       ctx.drawImage(img, 0, 0, img.width, img.height);
+
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const data = imageData.data;
+
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
         const g = data[i + 1];
         const b = data[i + 2];
- 
-        if (b > 150 && b > r && b > g) {
-          data[i + 3] = 0;
-        }
+
+        if (b > 150 && b > r && b > g) data[i + 3] = 0;
       }
+
       ctx.putImageData(imageData, 0, 0);
       callback(canvas.toDataURL());
     };
     img.src = imageUrl;
   }
- 
+
   function processImages() {
-    document.querySelectorAll("image._3tYRU").forEach((imageElement) => {
-      removeBlueBackground(imageElement.getAttribute("xlink:href"), (newImageUrl) => {
-        imageElement.setAttribute("xlink:href", newImageUrl);
+    document.querySelectorAll("image._3tYRU").forEach((el) => {
+      removeBlueBackground(el.getAttribute("xlink:href"), (url) => {
+        el.setAttribute("xlink:href", url);
       });
     });
   }
- 
+
   window.addEventListener("load", processImages);
 })();
- 
-// ⋆｡ﾟ☁︎｡⋆｡ ﾟ☾ ﾟ｡⋆ | CSS
-(function() {
-    'use strict';
-    GM_addStyle(`
-        /* Global Attributes */
+
+
+injectCss("vanta-theme-css", `
+/* Global Attributes */
         :root {
         --reactpanels: rgba(18, 18, 18, 0.36);
         --focusreactpanels: rgba(24, 24, 24, 0.56);
@@ -337,5 +333,5 @@ const injectCss = (id, css) => {
         .j4PNr ._38CK4 .Rj_QH, .j4PNr ._38CK4 ._341Kw {
         display: none !important;
         }
-    `);
-})();
+`);
+
