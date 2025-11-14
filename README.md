@@ -8,13 +8,9 @@ Download the folder into a zip file and extract it. Afterwards, go to the manage
 
 # Usage
 
-By default, the plugins for the extension come with the folder and can be turned on and off if needed. However if I on any occasion add a new plugin, it will not automatically update with it. You will have to download it manually into the extension's plugin folder from the Github or through the extension itself. 
+By default, the plugins for the extension come with the folder and can be turned on and off if needed. However if I on any occasion add a new plugin, it will not automatically update with it. You will have to download it manually into the extension's plugin folder from the Github or through the extension itself. You can search and filter out plugins in the extension to find what you need.
 
 <img width="485" height="497" alt="image" src="https://github.com/user-attachments/assets/2abc8342-2b3b-483e-aa1e-ac92213379c9"/>
-
-You can search and filter out plugins in the extension to find what you need.
-
-<img width="471" height="129" alt="image" src="https://github.com/user-attachments/assets/cc59b862-ccee-4ba9-885a-48128d21656e"/>
 
 # Disclaimer
 
