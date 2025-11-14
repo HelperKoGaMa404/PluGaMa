@@ -3,4 +3,9 @@
   "description": "A gentle bright theme in dreams of summer sunset.",
   "type": "themes",
   "source_code": "vanta_theme.js"
+},{
+  "title": "PlexSpace - A KoGaMa Theme made by cybrskunk",
+  "description": "A cozy yet boring dark mode theme with orange hues.",
+  "type": "themes",
+  "source_code": "plexspace_theme.js"
 }]
