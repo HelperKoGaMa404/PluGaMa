@@ -59,8 +59,8 @@ searchButton.addEventListener('click', function (e) {
 function applyFilters(searchQuery, typeValue) {
     const pluginContainer = document.getElementById('plugins-container');
     let filteredPlugins = plugins.filter(plugin => {
-        if (typeValue === 'all' && plugin.Title.includes(searchQuery)) return true;
-        return plugin.Type.toLowerCase() === typeValue && plugin.Title.includes(searchQuery);
+        if (typeValue === 'all' && plugin.Title.toLowerCase().includes(searchQuery.toLowerCase())) return true;
+        return plugin.Type.toLowerCase() === typeValue && plugin.Title.toLowerCase().includes(searchQuery.toLowerCase());
     });
     if (filteredPlugins.length === 0) {
         pluginContainer.innerText = `No plugins found. Maybe you could suggest a feature to @ddocskgm!`;
