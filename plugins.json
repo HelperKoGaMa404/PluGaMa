@@ -8,4 +8,9 @@
   "description": "A cozy yet boring dark mode theme with orange hues.",
   "type": "themes",
   "source_code": "plexspace_theme.js"
+},{
+  "title": "KoGaMa Server Chooser - A KoGaMa script made by Helper",
+  "description": "Helps you find a server session by retrying every fetch request to get the session ID until it's the desired one and set that one to be chosen.",
+  "type": "scripts",
+  "source_code": "server_chooser.js"
 }]
