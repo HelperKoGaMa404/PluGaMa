@@ -1,6 +1,6 @@
 # About
 
-PluGaMa is a KoGaMa extension created to improve the user experience by injecting plugins suggested by users. It currently on Chrome or any other Chromium based browser.
+PluGaMa is a KoGaMa extension created to improve the user experience by injecting plugins suggested by users. It is currently on Chrome or any other Chromium based browser.
 
 # Installation
 
