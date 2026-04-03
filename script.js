@@ -107,7 +107,7 @@ function applyFilters(searchQuery, typeValue) {
                         }
                     }).catch(error => {
                         const downloadButton = document.createElement('i');
-                        downloadButton.className = 'fa-light fa-download';
+                        downloadButton.className = 'fa-solid fa-download';
                         toggle.parentElement.appendChild(downloadButton);
                         downloadButton.addEventListener('click', function () {
                             if (plugin.title === downloadButton.parentElement.parentElement.parentElement.querySelector('.plugin-info .plugin-title').innerText) {
