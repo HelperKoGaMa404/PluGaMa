@@ -3,28 +3,52 @@ let activeConnectBtn = null;
 const match = location.pathname.match(/\/(\d+)\//);
 const gameID = match ? match[1] : null;
 if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
-    const originalOpen = XMLHttpRequest.prototype.open;
-    const originalSend = XMLHttpRequest.prototype.send;
-    
-    XMLHttpRequest.prototype.open = function(method, url) {
+ const originalFetch = window.fetch;
+    window.fetch = async function (resource, config) {
+        const response = await originalFetch(resource, config);
+        const url = (resource instanceof Request) ? resource.url : resource;
+        if (url && url.includes('/locator/session/') && !url.includes('extension_initiated=1')) {
+            try {
+                const data = await response.clone().json();
+                if (data && data.hasOwnProperty('sessionID')) {
+                    data.sessionID = overrideSessionID;
+                    return new Response(JSON.stringify(data), {
+                        status: response.status,
+                        statusText: response.statusText,
+                        headers: new Headers(response.headers)
+                    });
+                }
+            } catch (e) {
+                console.error("Fetch Intercept Error:", e);
+            }
+        }
+        return response;
+    };
+    const XHR = XMLHttpRequest.prototype;
+    const originalOpen = XHR.open;
+    const originalSend = XHR.send;
+    XHR.open = function(method, url) {
         this._url = url;
         return originalOpen.apply(this, arguments);
     };
-    
-    XMLHttpRequest.prototype.send = function(body) {
-        if (this._url && this._url.includes('/locator/session/') && overrideSessionID) {
-            try {
-                let data = JSON.parse(body);
-                if (data && data.sessionID) {
-                    data.sessionID = overrideSessionID;
-                    body = JSON.stringify(data);
+    XHR.send = function() {
+        this.addEventListener('readystatechange', function() {
+            if (this.readyState === 4 && this._url && this._url.includes('/locator/session/')) {
+                try {
+                    const data = JSON.parse(this.responseText);
+                    if (data && data.hasOwnProperty('sessionID')) {
+                        data.sessionID = overrideSessionID;
+                        Object.defineProperty(this, 'responseText', { value: JSON.stringify(data) });
+                        Object.defineProperty(this, 'response', { value: JSON.stringify(data) });
+                    }
+                } catch (e) {
+                    console.error("XHR Intercept Error:", e);
                 }
-            } catch (e) {
             }
-        }
-        return originalSend.apply(this, [body]);
+        });
+        return originalSend.apply(this, arguments);
     };
-    
+
     function createStyledPanel() {
         if (document.getElementById('tm-server-panel-container')) return;
     
