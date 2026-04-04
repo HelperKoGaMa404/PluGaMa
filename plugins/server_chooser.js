@@ -3,55 +3,35 @@ let activeConnectBtn = null;
 const match = location.pathname.match(/\/(\d+)\//);
 const gameID = match ? match[1] : null;
 if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
- const originalFetch = window.fetch;
-    window.fetch = async function (resource, config) {
-        const response = await originalFetch(resource, config);
-        const url = (resource instanceof Request) ? resource.url : resource;
-        if (url && url.includes('/locator/session/') && !url.includes('extension_initiated=1')) {
-            try {
-                const data = await response.clone().json();
-                if (data && data.hasOwnProperty('sessionID')) {
-                    data.sessionID = overrideSessionID;
-                    return new Response(JSON.stringify(data), {
-                        status: response.status,
-                        statusText: response.statusText,
-                        headers: new Headers(response.headers)
-                    });
-                }
-            } catch (e) {
-                console.error("Fetch Intercept Error:", e);
-            }
-        }
-        return response;
-    };
-    const XHR = XMLHttpRequest.prototype;
-    const originalOpen = XHR.open;
-    const originalSend = XHR.send;
-    XHR.open = function(method, url) {
+    const originalOpen = XMLHttpRequest.prototype.open;
+    XMLHttpRequest.prototype.open = function (method, url) {
         this._url = url;
-        return originalOpen.apply(this, arguments);
-    };
-    XHR.send = function() {
-        this.addEventListener('readystatechange', function() {
-            if (this.readyState === 4 && this._url && this._url.includes('/locator/session/')) {
+        this.addEventListener('readystatechange', function () {
+            if (this.readyState === 4 && this._url.includes('/locator/session/')) {
                 try {
-                    const data = JSON.parse(this.responseText);
-                    if (data && data.hasOwnProperty('sessionID')) {
+                    let data = JSON.parse(this.responseText);
+                    if (typeof overrideSessionID !== 'undefined' && overrideSessionID) {
                         data.sessionID = overrideSessionID;
-                        Object.defineProperty(this, 'responseText', { value: JSON.stringify(data) });
-                        Object.defineProperty(this, 'response', { value: JSON.stringify(data) });
                     }
+                    const modifiedResponse = JSON.stringify(data);
+                    Object.defineProperty(this, 'responseText', {
+                        get: () => modifiedResponse,
+                        configurable: true
+                    });
+                    Object.defineProperty(this, 'response', {
+                        get: () => modifiedResponse,
+                        configurable: true
+                    });
                 } catch (e) {
-                    console.error("XHR Intercept Error:", e);
+                    console.error("Failed to edit XHR response:", e);
                 }
             }
         });
-        return originalSend.apply(this, arguments);
+        return originalOpen.apply(this, arguments);
     };
-
     function createStyledPanel() {
         if (document.getElementById('tm-server-panel-container')) return;
-    
+
         const panelContainer = document.createElement('div');
         panelContainer.id = 'tm-server-panel-container';
         Object.assign(panelContainer.style, {
@@ -59,7 +39,7 @@ if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
             backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'none', justifyContent: 'center',
             alignItems: 'center', zIndex: '99999', fontFamily: 'Open Sans,sans-serif'
         });
-    
+
         panelContainer.innerHTML = `
                 <div style="background-color: #333333; color: white; position: relative; max-width: 600px; width: 100%; border-radius: 4px; box-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2); --Paper-shadow: 0px 11px 15px -7px rgba(0,0,0,0.2),0px 24px 38px 3px rgba(0,0,0,0.14),0px 9px 46px 8px rgba(0,0,0,0.12); --Paper-overlay: linear-gradient(rgba(255, 255, 255, 0.165), rgba(255, 255, 255, 0.165));">
                     <h2 style="padding: 16px 24px; margin: 0; font-weight: 600; font-size: 1.25rem; solid #333;">
@@ -81,33 +61,33 @@ if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
                     </div>
                 </div>
             `;
-    
+
         document.body.appendChild(panelContainer);
         const hidePanel = () => { panelContainer.style.display = 'none'; };
         panelContainer.querySelector('#close-panel').onclick = hidePanel;
         panelContainer.querySelector('#cancel-btn').onclick = hidePanel;
-        panelContainer.onclick = (e) => { if(e.target === panelContainer) hidePanel(); };
+        panelContainer.onclick = (e) => { if (e.target === panelContainer) hidePanel(); };
         const fetchBtn = panelContainer.querySelector('#fetch-server-btn');
         const listContainer = panelContainer.querySelector('#session-list-container');
-    
+
         fetchBtn.onclick = async () => {
             fetchBtn.innerText = 'Loading...';
             try {
-                const response = await fetch(`${location.origin}/locator/session/?objectID=${gameID}&profileID=0&lang=en_US&type=play&referrer=kogama`);
+                const response = await fetch(`${location.origin}/locator/session/?objectID=${gameID}&profileID=0&lang=en_US&type=play&referrer&extension_initiated=1`);
                 const data = await response.json();
-    
+
                 if (listContainer.innerText.includes('No servers')) listContainer.innerHTML = '';
-    
+
                 if (data.sessionID) {
                     const currentIndex = listContainer.children.length + 1;
                     const sessionID = data.sessionID;
-    
+
                     const row = document.createElement('div');
                     Object.assign(row.style, {
                         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                         padding: '12px 0'
                     });
-    
+
                     row.innerHTML = `
         <div>
             <div style="color: #81c784; font-weight: bold;">Scan #${currentIndex}</div>
@@ -139,7 +119,7 @@ if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
             }
         };
     }
-    
+
     function createServerButton() {
         const btn = document.createElement('button');
         btn.id = 'tm-server-btn';
@@ -174,7 +154,7 @@ if (gameID && location.href.startsWith(location.origin + '/games/play/')) {
                 </svg>
                 <span>Servers</span>
             `;
-    
+
         btn.onclick = (e) => {
             e.stopPropagation();
             document.getElementById('tm-server-panel-container').style.display = 'flex';
